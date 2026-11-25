@@ -1,7 +1,8 @@
 
 # ============================================================
-# LAPTOP PRICE PREDICTION - COMPLETE ML PROJECT
+# LAPTOP PRICE PREDICTION - MACHINE LEARNING PROJECT
 # ============================================================
+
 
 # 1. IMPORT LIBRARIES
 
@@ -14,7 +15,11 @@ import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score
+)
 
 
 # ============================================================
@@ -48,17 +53,18 @@ print(df.duplicated().sum())
 # Graph 1: Laptop Price Distribution
 
 plt.figure(figsize=(8, 5))
+
 sns.histplot(df["Price_euros"], kde=True)
+
 plt.title("Laptop Price Distribution")
 plt.xlabel("Price in Euros")
 plt.ylabel("Number of Laptops")
+
 plt.tight_layout()
 plt.show()
 
 
 # Graph 2: Company vs Average Price
-
-plt.figure(figsize=(12, 6))
 
 company_price = (
     df.groupby("Company")["Price_euros"]
@@ -66,23 +72,36 @@ company_price = (
     .sort_values(ascending=False)
 )
 
-sns.barplot(x=company_price.index, y=company_price.values)
+plt.figure(figsize=(12, 6))
+
+sns.barplot(
+    x=company_price.index,
+    y=company_price.values
+)
 
 plt.title("Average Laptop Price by Company")
 plt.xlabel("Company")
 plt.ylabel("Average Price in Euros")
+
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
 
 
-# Graph 3: RAM vs Price
+# Graph 3: RAM vs Laptop Price
 
 plt.figure(figsize=(9, 5))
-sns.boxplot(x="Ram", y="Price_euros", data=df)
+
+sns.boxplot(
+    x="Ram",
+    y="Price_euros",
+    data=df
+)
+
 plt.title("RAM vs Laptop Price")
 plt.xlabel("RAM")
 plt.ylabel("Price in Euros")
+
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
@@ -91,10 +110,17 @@ plt.show()
 # Graph 4: Laptop Type vs Price
 
 plt.figure(figsize=(10, 5))
-sns.boxplot(x="TypeName", y="Price_euros", data=df)
+
+sns.boxplot(
+    x="TypeName",
+    y="Price_euros",
+    data=df
+)
+
 plt.title("Laptop Type vs Price")
 plt.xlabel("Laptop Type")
 plt.ylabel("Price in Euros")
+
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
@@ -108,55 +134,57 @@ data = df.copy()
 
 # Remove unnecessary columns
 
-data.drop(
-    columns=["laptop_ID", "Product"],
-    inplace=True
+data = data.drop(
+    columns=["laptop_ID", "Product"]
 )
 
-# Convert RAM to numeric
-# Works with values such as 8GB and 8.0
+# Convert RAM into numeric values
 
 data["Ram"] = pd.to_numeric(
-    data["Ram"].astype(str).str.extract(r"([\d.]+)", expand=False),
+    data["Ram"]
+    .astype(str)
+    .str.extract(r"([\d.]+)", expand=False),
     errors="coerce"
 )
 
-# Convert Weight to numeric
-# Works with values such as 1.37kg and 1.37
+# Convert Weight into numeric values
 
 data["Weight"] = pd.to_numeric(
-    data["Weight"].astype(str).str.extract(r"([\d.]+)", expand=False),
+    data["Weight"]
+    .astype(str)
+    .str.extract(r"([\d.]+)", expand=False),
     errors="coerce"
 )
 
-# Check missing values after conversion
+# Remove missing values
 
-print("\nMissing Values After Preprocessing:")
-print(data.isnull().sum())
+data = data.dropna()
 
-# Remove rows with missing values, if any
-
-data.dropna(inplace=True)
-
-print("\nPreprocessed Data:")
+print("\nPREPROCESSED DATA:")
 print(data.head())
 
-print("\nPreprocessed Data Types:")
+print("\nDATA TYPES:")
 print(data.dtypes)
+
+print("\nMISSING VALUES AFTER PREPROCESSING:")
+print(data.isnull().sum())
 
 
 # ============================================================
 # 5. SPLIT FEATURES AND TARGET
 # ============================================================
 
-X = data.drop("Price_euros", axis=1)
+X = data.drop(
+    "Price_euros",
+    axis=1
+)
 
 y = data["Price_euros"]
 
-print("\nIndependent Variables:")
+print("\nINDEPENDENT VARIABLES:")
 print(X.head())
 
-print("\nTarget Variable:")
+print("\nDEPENDENT VARIABLE:")
 print(y.head())
 
 
@@ -169,13 +197,13 @@ num_cols = X.select_dtypes(
 ).columns.tolist()
 
 cat_cols = X.select_dtypes(
-    include=["object"]
+    include=["object", "str"]
 ).columns.tolist()
 
-print("\nNumerical Columns:")
+print("\nNUMERICAL COLUMNS:")
 print(num_cols)
 
-print("\nCategorical Columns:")
+print("\nCATEGORICAL COLUMNS:")
 print(cat_cols)
 
 
@@ -195,7 +223,7 @@ print("Testing Data Shape:", X_test.shape)
 
 
 # ============================================================
-# 8. FEATURE SCALING
+# 8. FEATURE SCALING - MINMAX SCALER
 # ============================================================
 
 scaler = MinMaxScaler()
@@ -210,7 +238,7 @@ X_test_num = scaler.transform(
 
 
 # ============================================================
-# 9. CATEGORICAL ENCODING
+# 9. CATEGORICAL ENCODING - ONE HOT ENCODER
 # ============================================================
 
 encoder = OneHotEncoder(
@@ -243,7 +271,7 @@ print("Final Testing Shape:", X_test_final.shape)
 
 
 # ============================================================
-# 11. MODEL BUILDING
+# 11. MODEL BUILDING - RANDOM FOREST REGRESSOR
 # ============================================================
 
 model = RandomForestRegressor(
@@ -263,20 +291,31 @@ print("\nMODEL TRAINED SUCCESSFULLY!")
 # 12. MODEL PREDICTION
 # ============================================================
 
-y_pred = model.predict(X_test_final)
+y_pred = model.predict(
+    X_test_final
+)
 
 
 # ============================================================
 # 13. MODEL EVALUATION
 # ============================================================
 
-mae = mean_absolute_error(y_test, y_pred)
+mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
 
-mse = mean_squared_error(y_test, y_pred)
+mse = mean_squared_error(
+    y_test,
+    y_pred
+)
 
 rmse = np.sqrt(mse)
 
-r2 = r2_score(y_test, y_pred)
+r2 = r2_score(
+    y_test,
+    y_pred
+)
 
 print("\n========== MODEL PERFORMANCE ==========")
 
@@ -288,7 +327,11 @@ print("RMSE:", round(rmse, 2))
 
 print("R2 Score:", round(r2, 4))
 
-print("R2 Score Percentage:", round(r2 * 100, 2), "%")
+print(
+    "R2 Score Percentage:",
+    round(r2 * 100, 2),
+    "%"
+)
 
 
 # ============================================================
@@ -297,10 +340,13 @@ print("R2 Score Percentage:", round(r2 * 100, 2), "%")
 
 plt.figure(figsize=(8, 5))
 
-plt.scatter(y_test, y_pred, alpha=0.6)
+plt.scatter(
+    y_test,
+    y_pred,
+    alpha=0.6
+)
 
 plt.xlabel("Actual Laptop Price")
-
 plt.ylabel("Predicted Laptop Price")
 
 plt.title("Actual vs Predicted Laptop Prices")
@@ -335,3 +381,4 @@ joblib.dump(
 print("\nMODEL ARTIFACTS SAVED SUCCESSFULLY!")
 
 print("\nPROJECT TRAINING COMPLETED!")
+
